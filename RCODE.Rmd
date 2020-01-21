@@ -1,0 +1,94 @@
+---
+title: "Untitled"
+author: "Lisa Weinstein"
+date: "10/23/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r}
+# initial
+setwd("~/Desktop/samples")
+library("ggplot2")
+#library(dplyr)
+
+# plot for all patients, and manually select balance, imbalance, questionable patients
+colNumber=max(count.fields("temp_forR.tsv", sep = "\t"))
+colName=paste("V",1:colNumber-1,sep="")
+
+
+
+
+input=read.delim("temp_forR.tsv", header=F, sep="\t",fill=TRUE, row.names= 1, col.names = colName)
+
+#outputs a list of allele ratios for each sample(for normal and tumor types)
+#deletes NAs
+myRowNames=rownames(input)
+dataForR="NA"
+for(i in 1:nrow(input)){
+  mySample=strsplit(myRowNames[i],"_")[[1]][1]
+  myType=strsplit(myRowNames[i],"_")[[1]][2]
+  for(j in 1:ncol(input)){
+    if(is.na(input[i,j])){
+      break
+    }else{
+      if(i==1 & j==1){
+        dataForR=cbind(input[i,j],mySample, myType)
+      }else{
+        dataForR=rbind(dataForR, cbind(input[i,j],mySample, myType))
+      }
+    }
+  }
+}
+#creates a separate bell curve graphs containing the tumor and normal tissue for each sample
+dataForR=as.data.frame(dataForR)
+colnames(dataForR)=c("percentage","sample","type")
+dataForR$percentage=as.numeric(as.character(dataForR$percentage))
+ggplot(dataForR, aes(x=percentage,color=type))+geom_density()+facet_wrap(~sample)
+
+#plot for balance samples
+subsetData=c("TCGA-A7-A0D9")
+dataForSubset=dataForR[dataForR$sample %in% subsetData,]
+ggplot(dataForSubset, aes(x=percentage,color=type))+geom_density()+facet_wrap(~sample)+labs(title="BRCA (Balance)")+theme(plot.title = element_text(hjust = 0.5))
+
+
+       
+       
+# plot for imbalance
+#subsetData=c("TCGA-AO-A0J4")
+#dataForSubset=dataForR[dataForR$sample %in% subsetData,]
+#ggplot(dataForSubset, aes(x=percentage,color=type))+geom_density()+facet_wrap(~sample)+labs(title="BRCA (Imbalance)")+theme(plot.title = element_text(hjust = 0.5))
+#plot for questionable
+#subsetData=c("TCGA-A6-2681")
+#dataForSubset=dataForR[dataForR$sample %in% subsetData,]
+#ggplot(dataForSubset, aes(x=percentage,color=type))+geom_density()+facet_wrap(~sample)+labs(title="COAD (Questionable)")+theme(plot.title = element_text(hjust = 0.5))
+#mark
+                   
+
+
+
+
+
+
+
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
