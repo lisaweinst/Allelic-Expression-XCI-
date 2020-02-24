@@ -1,0 +1,1 @@
+count.snp.xlsx files show the inactive/escape statuses on each snp from each sample. The hg38.snp.xlsx files displays a gene's escape when compared to GTEx for each sample. '0' shows the same escape status as GTEx, '1' shows a gain in escape status and '-1' shows a loss in escape status. 
